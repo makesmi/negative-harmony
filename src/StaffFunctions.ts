@@ -10,7 +10,7 @@ export const flatsInKey = (key: number) => range(0, -signsInKey[key])
 export const sharpsInKey = (key: number) => range(0, signsInKey[key])
     .map(sharp => (5 + sharp * 7) % 12)
     .map(tone => sharpNumbers[tone])
-    .map(tone => tone > 3 ? tone : tone + 7)
+    .map(tone => tone > 4 ? tone : tone + 7)
 
 export const notePosition = (note: number, key: number) => {
     const tone = (note + 12) % 12
@@ -37,9 +37,21 @@ export const lineSigns = (key: number) => {
     return signs
 }
 
+export const bestKey = (notes: number[]) =>
+    range(0, 12).sort((a, b) => {
+        const accidentalDifference = accidentalsInKey(notes, a) - accidentalsInKey(notes, b)
+        const blackDifference = Math.abs(signsInKey[a]) - Math.abs(signsInKey[b])
+        return accidentalDifference || blackDifference
+    })[0]
+
 export const range = (a: number, b: number) =>
     [...Array(Math.max(0, b - a)).keys()]
     .map(i => i + a)
+
+const accidentalsInKey = (notes: number[], key: number) =>
+    notes.map(note => (24 + note - key) % 12)
+    .filter(note => blacks[note])
+    .length
 
 export const signsInKey = [0, -5, 2, -3, 4, -1, 6, 1, -4, 3, -2, 5]
 export const blacks = [false, true, false, true, false, false, true, false, true, false, true, false]
