@@ -170,7 +170,7 @@ const loadImages = () => {
 
 export default Staff
 
-type Chords = Record<number, string>
+export type Chords = {[index: number]: string}//Record<number, string>
 
 interface StaffProps{
     notes: number[],
