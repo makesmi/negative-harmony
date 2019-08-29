@@ -4,6 +4,7 @@ export const appStyle: CSSProperties = {
     marginLeft: '15pt',
     marginTop: '30t'
 }
+
 export const buttonStyle: CSSProperties = {
     marginLeft: '8pt',
     fontSize: '1.5em',

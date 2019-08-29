@@ -26,7 +26,7 @@ const App: React.FC = () => {
   }
 
   const updateChordText = (event:ChangeEvent<HTMLInputElement>) => {
-    if(!notes[selected]){ return }
+    if(selected === -1 || notes[selected] === undefined){ return }
     const text = event.target.value.substring(0, 8)
     setChordText(text)
     setChords({...chords, [selected]: text})
