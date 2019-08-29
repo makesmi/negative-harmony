@@ -1,8 +1,9 @@
 import React, { useState, ChangeEvent, useRef, CSSProperties } from 'react'
 import Piano from './Piano'
 import Staff, { Chords } from './Staff'
-import { bestKey } from './StaffFunctions';
-import { negativeChord, negativeMelody } from './ChordFunctions';
+import { bestKey } from './StaffFunctions'
+import { negativeChord, negativeMelody } from './ChordFunctions'
+import { buttonStyle, hiddenInput, appStyle } from './AppStyles'
 
 const App: React.FC = () => {
   const [notes, setNotes] = useState<number[]>([])
@@ -81,24 +82,3 @@ const computeNegativeChords = (chords: Chords, fromKey: number, toKey: number) =
 }
 
 export default App
-
-const appStyle: CSSProperties = {
-  marginLeft: '15pt',
-  marginTop: '30t'
-}
-
-const buttonStyle: CSSProperties = {
-  marginLeft: '8pt',
-  fontSize: '1.5em',
-  verticalAlign: 'top',
-  minWidth: '1.5em'
-}
-
-const hiddenInput: CSSProperties = {
-  background: 'transparent',
-  border: 'none',
-  outline: 'none',
-  color: 'transparent',
-  cursor: 'default',
-  position: 'absolute'
-}

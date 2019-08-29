@@ -1,6 +1,6 @@
 import React, {useRef, useEffect, useState} from 'react'
 import * as Letters from './ToneLetters'
-import { drawKeys, KeyArea } from './PianoGraphics';
+import { drawKeys, KeyArea } from './PianoGraphics'
 
 const Piano: React.FC<PianoProps> = ({ press, keys = 32, first = 'A', height = 100 }) => {
     const firstTone = Letters.getTone(first)

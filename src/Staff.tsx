@@ -1,6 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import * as Functions from './StaffFunctions'
-import { loadImages, Note, Metrics, drawStaff } from './StaffGraphics';
+import { loadImages, Note, Metrics, drawStaff } from './StaffGraphics'
 
 
 const Staff: React.FC<StaffProps> = ({notes, selected = -1, setSelected = ()=>0, chords = {}, keyTone = 0, height = 50, notesMax = 10}) => {
