@@ -1,8 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 import * as Functions from './StaffFunctions'
-import sharpFile from './sharp.png'
-import neutralFile from './neutral.png'
-import flatFile from './flat.png'
+import { loadImages, Note, Metrics, drawStaff } from './StaffGraphics';
 
 
 const Staff: React.FC<StaffProps> = ({notes, selected = -1, setSelected = ()=>0, chords = {}, keyTone = 0, height = 50, notesMax = 10}) => {
@@ -17,10 +15,7 @@ const Staff: React.FC<StaffProps> = ({notes, selected = -1, setSelected = ()=>0,
         if(!context){ return }
         initializeCanvas(context, metrics, height)
         const computed = computeNotes(notes, chords, keyTone, metrics, context)
-        drawNoteHighlight(computed, selected, metrics, context)
-        drawLines(metrics, context)
-        drawKeySignature(keyTone, metrics, context)
-        drawNotes(computed, metrics, context)
+        drawStaff(computed, keyTone, selected, metrics, context)
     })
 
     const click = (mouse:React.MouseEvent) => {
@@ -39,48 +34,6 @@ const Staff: React.FC<StaffProps> = ({notes, selected = -1, setSelected = ()=>0,
 
 const findNote = (notes: Note[], x: number) => {
     return notes.filter(note => note.startX < x).length - 1
-}
-
-const drawNoteHighlight = (notes: Note[], selected: number, metrics: Metrics, canvas: CanvasRenderingContext2D) => {
-    const note = notes[selected]
-    if(!note){ return }
-    const nextNote = notes[selected + 1]
-    const nextX = nextNote ? nextNote.startX : note.startX + metrics.noteGap * 2
-    const x = note.startX - metrics.lineGap / 4
-    canvas.fillStyle = "#FFDDDD"
-    canvas.fillRect(x, 0, nextX - note.startX, canvas.canvas.clientHeight)
-    canvas.fillStyle = "#000000"
-}
-
-const drawLines = (metrics: Metrics, canvas: CanvasRenderingContext2D) => {
-    Functions.range(0, 5).forEach(line => {
-        const y = metrics.linesY + metrics.lineGap * line
-        canvas.rect(0, y, metrics.width, 1)
-        canvas.stroke()
-        canvas.beginPath()
-    })
-    canvas.rect(0, metrics.linesY, 1, metrics.lineGap * 4)
-    canvas.rect(metrics.width - 1, metrics.linesY, 1, metrics.lineGap * 4)
-    canvas.stroke()
-    canvas.beginPath()
-}
-
-const drawNotes = (notes: Note[], metrics: Metrics, canvas: CanvasRenderingContext2D) => {
-    const radiusY = metrics.lineGap / 2.4
-    const radiusX = radiusY * 1.2
-    notes.forEach((note, index) => {
-        const lineY = lineYFromPosition(note.position, metrics)
-        if(note.accidental !== null){ 
-            drawAccidental(note.x, lineY, note.accidental, metrics, canvas) 
-        }
-        drawExtraLines(note.x, note.position, metrics, canvas)
-        canvas.ellipse(note.x, lineY, radiusX, radiusY, 0, 0, 6.3)
-        canvas.fill() 
-        canvas.beginPath()
-        if(note.chord){
-            canvas.fillText(note.chord, note.startX, metrics.lineGap)
-        }
-    })
 }
 
 const computeNotes = (notes: number[], chords: Chords, key: number, metrics: Metrics, canvas: CanvasRenderingContext2D) => {
@@ -106,49 +59,6 @@ const computeNotes = (notes: number[], chords: Chords, key: number, metrics: Met
     })
 }
 
-const drawKeySignature = (key: number, metrics: Metrics, canvas: CanvasRenderingContext2D) => {
-    const startX = metrics.lineGap
-
-    Functions.sharpsInKey(key)
-        .map(position => lineYFromPosition(position, metrics))
-        .forEach((y, index) => drawImage(startX + index * metrics.keySignGap, y, sharpImage, metrics, canvas))
-
-    Functions.flatsInKey(key)
-        .map(position => lineYFromPosition(position, metrics))
-        .forEach((y, index) => drawImage(startX + index * metrics.keySignGap, y, flatImage, metrics, canvas))
-}
-
-const drawAccidental = (x: number, lineY: number, sign: number, metrics: Metrics, canvas: CanvasRenderingContext2D) => {
-    const image = sign === 1 ? sharpImage : (sign === -1 ? flatImage : neutralImage)
-    drawImage(x - metrics.noteGap * 0.7, lineY, image, metrics, canvas)
-}
-
-const drawImage = (x: number, lineY: number, image: HTMLImageElement, metrics: Metrics, canvas: CanvasRenderingContext2D) => {
-    const size = metrics.noteGap / 300.0
-    const displacement = image === flatImage ? metrics.lineGap*1.9 : metrics.lineGap*1.25
-    canvas.drawImage(image, x, lineY - displacement, size * 100, size * 321)
-}
-
-const drawExtraLines = (x: number, position: number, metrics: Metrics, canvas: CanvasRenderingContext2D) => {
-    const lines = position > 0 ? Functions.lineRange(12, position) : Functions.lineRange(position, 1)
-    lines.forEach(line => {
-        const width = metrics.noteGap * 2 / 3
-        const y = lineYFromPosition(line, metrics)
-        canvas.rect(x - width/2, y, width, 1)
-        canvas.stroke()
-        canvas.beginPath()
-    })
-}
-
-const initializeCanvas = (canvas: CanvasRenderingContext2D, metrics: Metrics, height: number) => {
-    canvas.imageSmoothingEnabled = true
-    canvas.imageSmoothingQuality = 'high'  // 2019 only supported in Chrome
-    canvas.clearRect(0, 0, metrics.width, height)    
-    canvas.font = `bold ${metrics.lineGap}px serif`
-}
-
-const lineYFromPosition = (position: number, metrics: Metrics) => 
-    metrics.linesY + (10 - position) * metrics.lineGap / 2
 
 const computeMetrics = (height: number, notesMax: number, key: number): Metrics => {
     const sheetHeight = height * 0.45
@@ -162,11 +72,13 @@ const computeMetrics = (height: number, notesMax: number, key: number): Metrics 
     return { width, linesY, lineGap, noteGap, firstNoteX, keySignGap }
 }
 
-const loadImages = () => {
-    sharpImage.src = sharpFile
-    neutralImage.src = neutralFile
-    flatImage.src = flatFile
+const initializeCanvas = (canvas: CanvasRenderingContext2D, metrics: Metrics, height: number) => {
+    canvas.imageSmoothingEnabled = true
+    canvas.imageSmoothingQuality = 'high'  // 2019 only supported in Chrome
+    canvas.clearRect(0, 0, metrics.width, height)    
+    canvas.font = `bold ${metrics.lineGap}px serif`
 }
+
 
 export default Staff
 
@@ -182,21 +94,3 @@ interface StaffProps{
     notesMax?: number
 }
 
-interface Metrics{
-    width: number,
-    linesY: number,
-    lineGap: number,
-    noteGap: number,
-    firstNoteX: number,
-    keySignGap: number
-}
-
-interface Note{
-    x: number,
-    startX: number,
-    position: number,
-    accidental: number|null,
-    chord: string
-}
-
-const sharpImage = new Image(), flatImage = new Image(), neutralImage = new Image()
