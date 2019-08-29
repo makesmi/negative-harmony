@@ -20,7 +20,7 @@ const Staff: React.FC<StaffProps> = ({notes, selected = -1, setSelected = ()=>0,
 
     const click = (mouse:React.MouseEvent) => {
         mouse.preventDefault()
-        if(!canvas.current){ return }
+        if(!canvas.current){ return } 
         const context = canvas.current.getContext('2d')
         if(!context){ return }
         const area = canvas.current.getBoundingClientRect()
@@ -43,8 +43,8 @@ const computeNotes = (notes: number[], chords: Chords, key: number, metrics: Met
 
     return notes.map((note, index) => {
         index > 0 && (x += metrics.noteGap)
-        const position = Functions.notePosition(note, key)
-        const letter = (position + 7) % 7
+        const positionY = Functions.notePosition(note, key)
+        const letter = (positionY + 7) % 7
         let accidental = null
         const sign = Functions.noteSign(note, key)
         if(sign !== signs[letter]){
@@ -55,7 +55,7 @@ const computeNotes = (notes: number[], chords: Chords, key: number, metrics: Met
             x = Math.max(x, nextChordX)
             nextChordX = x + canvas.measureText(chords[index]).width + metrics.lineGap / 2
         }
-        return {x, startX: x - metrics.lineGap / 2, position, accidental, chord: chords[index]}
+        return {x, startX: x - metrics.lineGap / 2, positionY, accidental, chord: chords[index]}
     })
 }
 

@@ -1,5 +1,6 @@
 import React, {useRef, useEffect, useState} from 'react'
 import * as Letters from './ToneLetters'
+import { drawKeys, KeyArea } from './PianoGraphics';
 
 const Piano: React.FC<PianoProps> = ({ press, keys = 32, first = 'A', height = 100 }) => {
     const firstTone = Letters.getTone(first)
@@ -7,7 +8,7 @@ const Piano: React.FC<PianoProps> = ({ press, keys = 32, first = 'A', height = 1
     const canvas = useRef<HTMLCanvasElement>(null)
     const [pressed, setPressed] = useState<number[]>([])
 
-    useEffect(() => drawKeys(firstTone, keys, metrics, canvas.current, pressed))
+    useEffect(() => drawPiano(firstTone, keys, metrics, canvas.current, pressed))
 
     const click = (mouse:React.MouseEvent) => {
         mouse.preventDefault()
@@ -31,33 +32,19 @@ const Piano: React.FC<PianoProps> = ({ press, keys = 32, first = 'A', height = 1
         onMouseDown={click} onMouseUp={release} ref={canvas}></canvas>
 }
 
-const findKey = (x:number, y:number, areas:KeyArea[]) => {
-    const found = areas.find((area:KeyArea) =>
+const findKey = (x:number, y:number, areas: KeyArea[]) => {
+    const found = areas.find((area: KeyArea) =>
             x >= area.x && y >= area.y && x < area.width + area.x && y < area.height + area.y
         )
     return found ? found.key : null
 }
 
-const drawKeys = (first: number, count: number, metrics: Metrics, element: HTMLCanvasElement|null, pressed:number[]) => {
+const drawPiano = (first: number, count: number, metrics: Metrics, element: HTMLCanvasElement|null, pressed:number[]) => {
     if(!element){ return }
     const canvas = element.getContext('2d')
     if(!canvas){ return }
     const areas = computeAreas(first, count, metrics, pressed)
-    canvas.strokeStyle = borderColor
-    canvas.lineWidth = 2
-    drawAreas(areas.white, canvas)
-    drawAreas(areas.black, canvas)
-}
-
-const drawAreas = (areas: KeyArea[], canvas: CanvasRenderingContext2D) => {
-    areas.forEach(area => {
-        canvas.fillStyle = area.white ? whiteColor : blackColor
-        if(area.pressed){ canvas.fillStyle = pressedColor }
-        canvas.fillRect(area.x, area.y, area.width, area.height)
-        canvas.rect(area.x, area.y, area.width, area.height)
-        canvas.stroke()
-        canvas.beginPath()
-    })
+    drawKeys(areas.white, areas.black, canvas)
 }
 
 const computeAreas = (fisrt: number, count: number, metrics: Metrics, pressed: number[]) => {
@@ -114,20 +101,6 @@ interface Metrics{
     width: number
 }
 
-interface KeyArea{
-    key: number,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    white: boolean,
-    pressed: boolean
-}
-
 const keyPositions = [0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6]
 const keyColors = [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1]
 const blackPositions = [0, 0.6, 0, 0.4, 0, 0, 0.6, 0, 0.5, 0, 0.4, 0]
-const pressedColor = "#FFBBCC"
-const whiteColor = "#FFFFFF"
-const blackColor = "#333333"
-const borderColor = "#303030"

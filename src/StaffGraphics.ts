@@ -21,11 +21,11 @@ const drawNotes = (notes: Note[], metrics: Metrics, canvas: CanvasRenderingConte
     const radiusY = metrics.lineGap / 2.4
     const radiusX = radiusY * 1.2
     notes.forEach((note, index) => {
-        const lineY = lineYFromPosition(note.position, metrics)
+        const lineY = lineYFromPosition(note.positionY, metrics)
         if(note.accidental !== null){ 
             drawAccidental(note.x, lineY, note.accidental, metrics, canvas) 
         }
-        drawExtraLines(note.x, note.position, metrics, canvas)
+        drawExtraLines(note.x, note.positionY, metrics, canvas)
         canvas.ellipse(note.x, lineY, radiusX, radiusY, 0, 0, 6.3)
         canvas.fill() 
         canvas.beginPath()
@@ -108,7 +108,7 @@ export interface Metrics{
 export interface Note{
     x: number,
     startX: number,
-    position: number,
+    positionY: number,
     accidental: number|null,
     chord: string
 }
