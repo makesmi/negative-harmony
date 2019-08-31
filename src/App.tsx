@@ -63,6 +63,19 @@ const App: React.FC = () => {
     setKey(0)
   }
 
+  const deleteNote = () => {
+    const index = notes.length - 1
+    setNotes(notes.slice(0, index))
+    if(chords[index]){
+      setChords({...chords, [index]: ''})
+      setNegativeChords({...negativeChords, [index]: ''})
+    }
+    if(selected === index || selectedNegative === index){
+      setSelected(-1)
+      setSelectedNegative(-1)
+    }
+  }
+
   const keyIncrement = (direction: number) => () =>
       setNegativeKey((negativeKey + direction + 12) % 12)
 
@@ -76,6 +89,7 @@ const App: React.FC = () => {
       <div>
         <Piano press={pressKey} height={120} keys={20} />
         <button onClick={clearNotes} style={buttonStyle}>clear</button>
+        <button onClick={deleteNote} style={buttonStyle}>delete</button>
       </div>
       <div>
         <h2>Negative Harmony:</h2>
