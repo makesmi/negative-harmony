@@ -82,7 +82,7 @@ const initializeCanvas = (canvas: CanvasRenderingContext2D, metrics: Metrics, he
 
 export default Staff
 
-export type Chords = {[index: number]: string}//Record<number, string>
+export type Chords = {[index: number]: string}
 
 interface StaffProps{
     notes: number[],

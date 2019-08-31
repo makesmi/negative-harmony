@@ -2,6 +2,15 @@ import { sharp, flat } from "./ToneLetters";
 import { isSharpKey } from "./StaffFunctions";
 
 
+export const mapChord = (chord: string, fromKey: number, toKey: number) => {
+    const parts = breakChord(chord)
+    if(!parts){ return '?' }
+    const tone = (parts.tone - fromKey + toKey + 12) % 12
+    const bass = parts.bass !== null ? (parts.bass - fromKey + toKey + 12) % 12 : null
+    const bassPart = bass != null ? '/' + getLetter(bass, toKey) : ''
+    return getLetter(tone, toKey) + parts.type + bassPart
+}
+
 export const negativeChord = (chord: string, fromKey: number, toKey: number) => {
     if(!chord){ return '' }
     const positive = breakChord(chord)
@@ -14,7 +23,7 @@ export const negativeChord = (chord: string, fromKey: number, toKey: number) => 
         (negative.bass - positive.tone + fromKey + toKey + 21) % 12
     const positiveBass = positive.bass !== null && negativeTone(positive.bass, fromKey, toKey)
     const bass = positiveBass || negativeBass
-    const bassPart = bass ? '/' + getLetter(bass, toKey) : ''
+    const bassPart = bass !== false ? '/' + getLetter(bass, toKey) : ''
     return getLetter(tone, toKey) + negative.type + bassPart
 }
 

@@ -2,7 +2,7 @@ import React, { useState, ChangeEvent, useRef } from 'react'
 import Piano from './Piano'
 import Staff, { Chords } from './Staff'
 import { bestKey } from './StaffFunctions'
-import { negativeChord, negativeMelody } from './ChordFunctions'
+import { negativeChord, negativeMelody, mapChord } from './ChordFunctions'
 import { buttonStyle, hiddenInput, appStyle } from './AppStyles'
 
 const App: React.FC = () => {
@@ -76,8 +76,11 @@ const App: React.FC = () => {
     }
   }
 
-  const keyIncrement = (direction: number) => () =>
-      setNegativeKey((negativeKey + direction + 12) % 12)
+  const keyIncrement = (direction: number) => () => {
+      const newKey = (negativeKey + direction + 12) % 12
+      setNegativeKey(newKey)
+      setNegativeChords(mapChords(negativeChords, negativeKey, newKey))
+  }
 
   return (
     <div style={appStyle}>
@@ -104,5 +107,12 @@ const App: React.FC = () => {
   )
 }
 
+const mapChords = (chords: Chords, fromKey: number, toKey: number) => {
+    const result: Chords = {}
+    for(let index in chords){
+      result[index] = mapChord(chords[index], fromKey, toKey)
+    }
+    return result
+}
 
 export default App
