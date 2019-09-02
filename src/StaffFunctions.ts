@@ -21,7 +21,7 @@ export const notePosition = (note: number, key: number) => {
 }
 
 export const noteSign = (note: number, key: number) => {
-    if(blacks[note % 12]){
+    if(blacks[(note + 12) % 12]){
         return isSharpKey(key) ? 1 : -1
     }else{
         return 0

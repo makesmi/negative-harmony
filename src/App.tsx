@@ -59,7 +59,9 @@ const App: React.FC = () => {
   const clearNotes = () => {
     setNotes([])
     setSelected(-1)
+    setSelectedNegative(-1)
     setChords({})
+    setNegativeChords({})
     setKey(0)
   }
 
