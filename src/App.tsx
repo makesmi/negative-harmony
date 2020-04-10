@@ -1,120 +1,85 @@
 import React, { useState, ChangeEvent, useRef } from 'react'
 import Piano from './Piano'
-import Staff, { Chords } from './Staff'
+import Staff from './Staff'
 import { bestKey } from './StaffFunctions'
-import { negativeChord, negativeMelody, mapChord } from './ChordFunctions'
+import { negativeChord, negativeMelody } from './ChordFunctions'
 import { buttonStyle, hiddenInput, appStyle } from './AppStyles'
+import useStaff from './StaffHook'
 
 const App: React.FC = () => {
-  const [notes, setNotes] = useState<number[]>([])
-  const [key, setKey] = useState<number>(0)
-  const [negativeKey, setNegativeKey] = useState<number>(0)
-  const [selected, setSelected] = useState<number>(-1)
-  const [selectedNegative, setSelectedNegative] = useState<number>(-1)
-  const [chords, setChords] = useState<Chords>({})
-  const [negativeChords, setNegativeChords] = useState<Chords>({})
+  const positive = useStaff()
+  const negative = useStaff()
   const [chordText, setChordText] = useState<string>('')
   const input = useRef<HTMLInputElement>(null)
-  const negativeNotes = negativeMelody(notes, key, negativeKey)
-
+  
   const pressKey = (key: number) => {
-    const note = key - 3    //first key in the piano is A
-    const newNotes = [...notes, note]
+    const note = key - 3    //first key in the piano is A instead of C
+    const newNotes = [...positive.notes, note]
     const newKey = bestKey(newNotes)
-    setKey(newKey)
-    setNegativeKey((newKey + 7) % 12)
-    setNotes(newNotes)
+    const negativeKey = (newKey + 7) % 12
+    positive.setKey(newKey)
+    negative.setKey(negativeKey)
+    positive.setNotes(newNotes)
+    negative.setNotes(negativeMelody(newNotes, newKey, negativeKey))
+  }
+
+  const changeChord = (text:string, staff:any) => {
+    const opposite = staff === positive ? negative : positive
+    staff.setChord(staff.selected, text)
+    const oppositeText = negativeChord(text, staff.key, opposite.key)
+    opposite.setChord(staff.selected, oppositeText)
   }
 
   const updateChordText = (event:ChangeEvent<HTMLInputElement>) => {
     const text = event.target.value.substring(0, 8)
     setChordText(text)
-    if(selected !== -1 && notes[selected] !== undefined){
-      setChords({...chords, [selected]: text})
-      const negative = negativeChord(text, key, negativeKey)
-      setNegativeChords({...negativeChords, [selected]: negative})
-    }else if(selectedNegative !== -1 && notes[selectedNegative] !== undefined){
-      setNegativeChords({...negativeChords, [selectedNegative]: text})
-      const positive = negativeChord(text, negativeKey, key)
-      setChords({...chords, [selectedNegative]: positive})
+    if(positive.noteSelected()){
+      changeChord(text, positive)
+    }else if(negative.noteSelected()){
+      changeChord(text, negative)
     }
   }
 
-  const selectNote = (index:number) => {
-    setSelected(index)
-    setSelectedNegative(-1)
-    setChordText(chords[index] || '')
-    if(!input.current){ return }
-    input.current.focus()
-  }
-
-  const selectNegative = (index:number) => {
-    setSelectedNegative(index)
-    setSelected(-1)
-    setChordText(negativeChords[index] || '')
+  const selectNote = (staff:any) => (index:number) => {
+    const opposite = staff === positive ? negative : positive
+    staff.setSelected(index)
+    opposite.setSelected(-1)
+    setChordText(staff.chords[index] || '')
     if(!input.current){ return }
     input.current.focus()
   }
 
   const clearNotes = () => {
-    setNotes([])
-    setSelected(-1)
-    setSelectedNegative(-1)
-    setChords({})
-    setNegativeChords({})
-    setKey(0)
+    positive.clear()
+    negative.clear()
   }
 
   const deleteNote = () => {
-    const index = notes.length - 1
-    setNotes(notes.slice(0, index))
-    if(chords[index]){
-      setChords({...chords, [index]: ''})
-      setNegativeChords({...negativeChords, [index]: ''})
-    }
-    if(selected === index || selectedNegative === index){
-      setSelected(-1)
-      setSelectedNegative(-1)
-    }
-  }
-
-  const keyIncrement = (direction: number) => () => {
-      const newKey = (negativeKey + direction + 12) % 12
-      setNegativeKey(newKey)
-      setNegativeChords(mapChords(negativeChords, negativeKey, newKey))
+    positive.deleteNote()
+    negative.deleteNote()
   }
 
   return (
     <div style={appStyle}>
       <div>
         <input value={chordText} onChange={updateChordText} ref={input} style={hiddenInput}/>
-        <Staff {...{notes, chords, selected}} setSelected={selectNote} 
-            keyTone={key} height={120} notesMax={25} />
+        <Staff {...positive.props} setSelected={selectNote(positive)} height={120} notesMax={25} />
       </div>
       <div>
         <Piano press={pressKey} height={120} keys={20} />
-        <button onClick={clearNotes} style={buttonStyle}>clear</button>
         <button onClick={deleteNote} style={buttonStyle}>delete</button>
+        <button onClick={clearNotes} style={buttonStyle}>clear</button>
       </div>
       <div>
         <h2>Negative Harmony:</h2>
-        <Staff notes={negativeNotes} chords={negativeChords} selected={selectedNegative} setSelected={selectNegative}
-            keyTone={negativeKey} height={120} notesMax={25} />
+        <Staff {...negative.props} setSelected={selectNote(negative)} height={120} notesMax={25} />
       </div>
       <div>
-        <button style={buttonStyle} onClick={keyIncrement(-1)}>-</button>
-        <button style={buttonStyle} onClick={keyIncrement(1)}>+</button>
+        <button style={buttonStyle} onClick={negative.incrementKey(-1)}>-</button>
+        <button style={buttonStyle} onClick={negative.incrementKey(1)}>+</button>
       </div>
     </div>
   )
-}
-
-const mapChords = (chords: Chords, fromKey: number, toKey: number) => {
-    const result: Chords = {}
-    for(let index in chords){
-      result[index] = mapChord(chords[index], fromKey, toKey)
-    }
-    return result
 }
 
 export default App

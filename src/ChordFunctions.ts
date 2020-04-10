@@ -50,6 +50,11 @@ const findTone = (letter:string) => {
     return tone === -1 ? null : tone
 }
 
+export const negativeNote = (note: number, fromKey: number, toKey: number) => {
+    const increment = (fromKey + toKey < 5) ? 12 : 0
+    return fromKey + toKey - note + 4 + increment
+}
+
 export const negativeMelody = (notes: number[], fromKey: number, toKey: number) => {
     const increment = (fromKey + toKey < 5) ? 12 : 0
     return notes.map(note => fromKey + toKey - note + 4 + increment)
