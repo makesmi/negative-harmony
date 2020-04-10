@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { Chords } from './Staff'
 import { mapChord } from './ChordFunctions'
 
-export default () => {
-  const [notes, setNotes] = useState<number[]>([])
-  const [key, setKey] = useState<number>(0)
+export default (defaultHarmony: StaffHarmony) => {
+  const [notes, setNotes] = useState<number[]>(defaultHarmony.notes)
+  const [key, setKey] = useState<number>(defaultHarmony.key)
   const [selected, setSelected] = useState<number>(-1)
-  const [chords, setChords] = useState<Chords>({})
+  const [chords, setChords] = useState<Chords>(defaultHarmony.chords)
 
   const clear = () => {
     setNotes([])
@@ -54,4 +54,10 @@ const mapChords = (chords: Chords, fromKey: number, toKey: number) => {
     result[index] = mapChord(chords[index], fromKey, toKey)
   }
   return result
+}
+
+export interface StaffHarmony{
+  notes: number[],
+  chords: Chords,
+  key: number
 }

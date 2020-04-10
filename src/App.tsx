@@ -1,14 +1,16 @@
 import React, { useState, ChangeEvent, useRef } from 'react'
 import Piano from './Piano'
 import Staff from './Staff'
+import defaultHarmony from './DefaultHarmony'
 import { bestKey } from './StaffFunctions'
 import { negativeChord, negativeMelody } from './ChordFunctions'
 import { buttonStyle, hiddenInput, appStyle } from './AppStyles'
 import useStaff from './StaffHook'
+import { capitalizeFirstLetter } from './StringUtils'
 
 const App: React.FC = () => {
-  const positive = useStaff()
-  const negative = useStaff()
+  const positive = useStaff(defaultHarmony.positive)
+  const negative = useStaff(defaultHarmony.negative)
   const [chordText, setChordText] = useState<string>('')
   const input = useRef<HTMLInputElement>(null)
   
@@ -31,7 +33,8 @@ const App: React.FC = () => {
   }
 
   const updateChordText = (event:ChangeEvent<HTMLInputElement>) => {
-    const text = event.target.value.substring(0, 8)
+    let text = event.target.value.substring(0, 8)
+    text = capitalizeFirstLetter(text)
     setChordText(text)
     if(positive.noteSelected()){
       changeChord(text, positive)
