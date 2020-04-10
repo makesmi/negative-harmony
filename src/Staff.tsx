@@ -79,7 +79,6 @@ const initializeCanvas = (canvas: CanvasRenderingContext2D, metrics: Metrics, he
     canvas.font = `bold ${metrics.lineGap}px serif`
 }
 
-
 export default Staff
 
 export type Chords = {[index: number]: string}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Chords } from './Staff'
-import { mapChord } from './ChordFunctions'
+import { mapChord, negativeChord } from './ChordFunctions'
 
 export default (defaultHarmony: StaffHarmony) => {
   const [notes, setNotes] = useState<number[]>(defaultHarmony.notes)
@@ -17,13 +17,15 @@ export default (defaultHarmony: StaffHarmony) => {
 
   const deleteNote = () => {
     const index = notes.length - 1
-    setNotes(notes.slice(0, index))
+    const sliced = notes.slice(0, index)
+    setNotes(sliced)
     if(chords[index]){
       setChords({...chords, [index]: ''})
     }
     if(selected === index){
       setSelected(-1)
     }
+    return sliced
   }
 
   const incrementKey = (direction:number) => () => {
@@ -54,6 +56,13 @@ const mapChords = (chords: Chords, fromKey: number, toKey: number) => {
     result[index] = mapChord(chords[index], fromKey, toKey)
   }
   return result
+}
+
+export const negateChords = (positive:Chords, key:number, negativeKey:number):Chords => {
+  return Object.entries(positive).map(k => parseInt(k[0]))
+    .reduce((prev, note) => ({
+          ...prev, [note]: negativeChord(positive[note], key, negativeKey)
+      }), {})
 }
 
 export interface StaffHarmony{

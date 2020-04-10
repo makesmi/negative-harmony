@@ -68,6 +68,7 @@ export const negativeChords: Record<string, string> = {
     'Cm': 'C',
     'Cdim': 'C#dim',
     'Caug': 'Haug',
+    'C+': 'H+',
     'Csus4': 'Csus2',
     'Csus2': 'Csus4',
     'C7': 'Am7b5',

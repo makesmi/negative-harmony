@@ -5,8 +5,9 @@ import defaultHarmony from './DefaultHarmony'
 import { bestKey } from './StaffFunctions'
 import { negativeChord, negativeMelody } from './ChordFunctions'
 import { buttonStyle, hiddenInput, appStyle } from './AppStyles'
-import useStaff from './StaffHook'
+import useStaff, { negateChords } from './StaffHook'
 import { capitalizeFirstLetter } from './StringUtils'
+import Instructions from './Instructions'
 
 const App: React.FC = () => {
   const positive = useStaff(defaultHarmony.positive)
@@ -14,15 +15,20 @@ const App: React.FC = () => {
   const [chordText, setChordText] = useState<string>('')
   const input = useRef<HTMLInputElement>(null)
   
-  const pressKey = (key: number) => {
-    const note = key - 3    //first key in the piano is A instead of C
-    const newNotes = [...positive.notes, note]
+  const changeNotes = (newNotes: number[]) => {
     const newKey = bestKey(newNotes)
     const negativeKey = (newKey + 7) % 12
     positive.setKey(newKey)
     negative.setKey(negativeKey)
     positive.setNotes(newNotes)
     negative.setNotes(negativeMelody(newNotes, newKey, negativeKey))
+    negative.setChords(negateChords(positive.chords, newKey, negativeKey))
+  }
+
+  const pressKey = (key: number) => {
+    const note = key - 3    //first key in the piano is A instead of C
+    const newNotes = [...positive.notes, note]
+    changeNotes(newNotes)
   }
 
   const changeChord = (text:string, staff:any) => {
@@ -58,8 +64,9 @@ const App: React.FC = () => {
   }
 
   const deleteNote = () => {
-    positive.deleteNote()
+    const sliced = positive.deleteNote()
     negative.deleteNote()
+    changeNotes(sliced)
   }
 
   return (
@@ -81,6 +88,7 @@ const App: React.FC = () => {
         <button style={buttonStyle} onClick={negative.incrementKey(-1)}>-</button>
         <button style={buttonStyle} onClick={negative.incrementKey(1)}>+</button>
       </div>
+      <Instructions />
     </div>
   )
 }
