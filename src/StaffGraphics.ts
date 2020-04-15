@@ -1,4 +1,4 @@
-import * as Functions from './StaffFunctions'
+import * as Functions from './StaffUtils'
 import sharpFile from './sharp.png'
 import neutralFile from './neutral.png'
 import flatFile from './flat.png'
@@ -11,10 +11,14 @@ export const drawStaff = (notes: Note[], key: number, selected: number, metrics:
     drawNotes(notes, metrics, context)
 }
 
-export const loadImages = () => {
-    sharpImage.src = sharpFile
-    neutralImage.src = neutralFile
-    flatImage.src = flatFile
+export const loadImages = (update:()=>void) => {
+    const loadImage = (image:HTMLImageElement, file:string) => {
+        image.src = file
+        image.onload = update
+    }
+    loadImage(sharpImage, sharpFile)
+    loadImage(flatImage, flatFile)
+    loadImage(neutralImage, neutralFile)
 }
 
 const drawNotes = (notes: Note[], metrics: Metrics, canvas: CanvasRenderingContext2D) => {
@@ -83,11 +87,11 @@ const drawExtraLines = (x: number, position: number, metrics: Metrics, canvas: C
 
 const drawKeySignature = (key: number, metrics: Metrics, canvas: CanvasRenderingContext2D) => {
     const startX = metrics.lineGap
-
+ 
     Functions.sharpsInKey(key)
         .map(position => lineYFromPosition(position, metrics))
         .forEach((y, index) => drawImage(startX + index * metrics.keySignGap, y, sharpImage, metrics, canvas))
-
+        
     Functions.flatsInKey(key)
         .map(position => lineYFromPosition(position, metrics))
         .forEach((y, index) => drawImage(startX + index * metrics.keySignGap, y, flatImage, metrics, canvas))

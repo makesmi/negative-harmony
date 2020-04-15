@@ -1,18 +1,28 @@
-import { negativeMelody} from './ChordFunctions'
-import { StaffHarmony, negateChords } from './StaffHook'
+import { mapChords, negateChord, constructChord} from './Chords'
+import { NONE_SELECTED, StaffState } from './StaffState'
+import { negativeMelody } from './ToneUtils'
 
 const createDefaultHarmony = () => {
-    const positive: StaffHarmony = {
+    const chord = (text:string) => constructChord(text) || { root: 0, bass: 0, type: '' }
+
+    const positive:StaffState = {
         notes: [5, 5, 4, 2, 2, 0, -1, 0, 2, 0],
-        chords: { 0: 'F', 3: 'Dm', 6: 'G7', 9: 'C' },
-        key: 0
+        chords: { 
+            0: chord('F'), 
+            3: chord('Dm'), 
+            6: chord('G7'), 
+            9: chord('C') 
+        },
+        key: 0,
+        selected: NONE_SELECTED
     }
     const negativeKey = (positive.key + 7) % 12
 
-    const negative: StaffHarmony = {
+    const negative:StaffState = {
         notes: negativeMelody(positive.notes, positive.key, negativeKey),
-        chords: negateChords(positive.chords, positive.key, negativeKey),
-        key: negativeKey
+        chords: mapChords(positive.chords, chord => negateChord(chord, positive.key, negativeKey)),
+        key: negativeKey,
+        selected: NONE_SELECTED
     }
 
     return { positive, negative }

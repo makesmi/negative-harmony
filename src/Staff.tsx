@@ -1,21 +1,24 @@
-import React, { useRef, useEffect } from 'react'
-import * as Functions from './StaffFunctions'
+import React, { useRef, useEffect, useState } from 'react'
+import * as Functions from './StaffUtils'
 import { loadImages, Note, Metrics, drawStaff } from './StaffGraphics'
+import { StaffState } from './StaffState'
+import { printChord } from './Chords'
 
 
-const Staff: React.FC<StaffProps> = ({notes, selected = -1, setSelected = ()=>0, chords = {}, keyTone = 0, height = 50, notesMax = 10}) => {
-    const metrics = computeMetrics(height, notesMax, keyTone)
+const Staff: React.FC<StaffProps> = ({state, setSelected = ()=>0, height = 50, notesMax = 10}) => {
+    const key = Functions.bestKey(state.notes)
+    const metrics = computeMetrics(height, notesMax, key)
     const canvas = useRef<HTMLCanvasElement>(null)
+    const [ , setUpdate] = useState(0)
 
-    useEffect(loadImages, [])
+    useEffect(() => loadImages(() => setUpdate(1)), [])
 
     useEffect(() => {
-        if(!canvas.current){ return }
-        const context = canvas.current.getContext('2d')
+        const context = canvas.current?.getContext('2d')
         if(!context){ return }
         initializeCanvas(context, metrics, height)
-        const computed = computeNotes(notes, chords, keyTone, metrics, context)
-        drawStaff(computed, keyTone, selected, metrics, context)
+        const computed = computeNotes(state, key, metrics, context)
+        drawStaff(computed, key, state.selected, metrics, context)
     })
 
     const click = (mouse:React.MouseEvent) => {
@@ -25,7 +28,7 @@ const Staff: React.FC<StaffProps> = ({notes, selected = -1, setSelected = ()=>0,
         if(!context){ return }
         const area = canvas.current.getBoundingClientRect()
         const x = mouse.clientX - area.left
-        const computed = computeNotes(notes, chords, keyTone, metrics, context)
+        const computed = computeNotes(state, key, metrics, context)
         setSelected(findNote(computed, x))
     }
 
@@ -36,29 +39,31 @@ const findNote = (notes: Note[], x: number) => {
     return notes.filter(note => note.startX < x).length - 1
 }
 
-const computeNotes = (notes: number[], chords: Chords, key: number, metrics: Metrics, canvas: CanvasRenderingContext2D) => {
+const computeNotes = (state:StaffState, key:number, metrics:Metrics, canvas:CanvasRenderingContext2D) => {
+    const { notes, chords } = state
+    const { noteGap, lineGap } = metrics
     let x = metrics.firstNoteX
     let nextChordX = 0
     const signs = Functions.lineSigns(key)
 
     return notes.map((note, index) => {
-        index > 0 && (x += metrics.noteGap)
+        index > 0 && (x += noteGap)
         const positionY = Functions.notePosition(note, key)
         const letter = (positionY + 7) % 7
         let accidental = null
         const sign = Functions.noteSign(note, key)
+        const chord = chords[index] && printChord(chords[index], key)
         if(sign !== signs[letter]){
-            x += metrics.noteGap / 2
+            x += noteGap / 2
             signs[letter] = accidental = sign
         }
-        if(chords[index]){
+        if(chord){
             x = Math.max(x, nextChordX)
-            nextChordX = x + canvas.measureText(chords[index]).width + metrics.lineGap / 2
+            nextChordX = x + canvas.measureText(chord).width + lineGap / 2
         }
-        return {x, startX: x - metrics.lineGap / 2, positionY, accidental, chord: chords[index]}
+        return { x, startX: x - lineGap / 2, positionY, accidental, chord }
     })
 }
-
 
 const computeMetrics = (height: number, notesMax: number, key: number): Metrics => {
     const sheetHeight = height * 0.45
@@ -79,17 +84,11 @@ const initializeCanvas = (canvas: CanvasRenderingContext2D, metrics: Metrics, he
     canvas.font = `bold ${metrics.lineGap}px serif`
 }
 
-export default Staff
-
-export type Chords = {[index: number]: string}
-
-interface StaffProps{
-    notes: number[],
-    selected?: number,
+export interface StaffProps{
+    state:StaffState,
     setSelected?: (note:number)=>void,
-    chords?: Chords,
-    keyTone?: number,
     height?: number,
     notesMax?: number
 }
 
+export default Staff

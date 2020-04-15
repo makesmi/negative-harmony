@@ -20,3 +20,14 @@ export const hiddenInput: CSSProperties = {
     cursor: 'default',
     position: 'absolute'
 }
+
+export const errorStyle: CSSProperties = {
+    paddingLeft: '5px',
+    borderRadius: '0.3em',
+    paddingRight: '5px',
+    background: 'pink',
+    color: '#8B0000',
+    fontWeight: 'bold',
+    fontSize: '1.5em',
+    marginLeft: '0.5em'
+}
