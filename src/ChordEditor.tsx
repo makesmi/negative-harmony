@@ -1,4 +1,4 @@
-import React, { useState, useRef, ChangeEvent } from 'react'
+import React, { useState, useRef, ChangeEvent, useEffect } from 'react'
 import { StaffState, StaffAction, NONE_SELECTED } from './StaffState'
 import { constructChord, printChord } from './Chords'
 import { hiddenInput, errorStyle } from './AppStyles'
@@ -16,8 +16,11 @@ const ChordEditor:React.FC<ChordEditorProps> = ({ positive, negative, dispatch }
     let text = (chord && printChord(chord, staff.key)) || ''
     if(text === '?'){ text = '' }
     if(text !== chordText){ setChordText(text) }
-    input.current && input.current.focus()
   }
+
+  useEffect(() => {
+    staff && input.current && input.current.focus()
+  })    
 
   const showError = (text:string) => {
     setError(text)
@@ -32,7 +35,7 @@ const ChordEditor:React.FC<ChordEditorProps> = ({ positive, negative, dispatch }
       dispatch({ type: 'setChord', note: staff.selected, chord })
     }else{
       dispatch({ type: 'deleteChord', note: staff.selected })
-      if(text){ showError('not recognized: ' + text) }
+      if(text){ showError('invalid chord: ' + text) }
     }
   }
   

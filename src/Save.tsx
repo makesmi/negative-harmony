@@ -1,59 +1,90 @@
-import React, { useState, ChangeEvent } from 'react'
-import { buttonStyle } from './AppStyles'
-import { StaffState } from './StaffState'
+import React, { useState, ChangeEvent, useEffect, useCallback } from 'react'
+import { buttonStyle, songsLabel, songsSelector, songNameField, savingInfo } from './AppStyles'
+import { AppState, AppAction } from './AppState'
+import axios from 'axios'
 
-const Save: React.FC<SaveProps> = ({ positive, setHarmony }) => {
+
+const Save: React.FC<SaveProps> = ({ state, dispatch, user }) => {
   const [name, setName] = useState('')
   const [selected, setSelected] = useState(-1)
   const [saved, setSaved] = useState<SavedHarmony[]>([])
+  const [info, setInfo] = useState({ error: false, message: '' })
+  const userId = user
 
+  const loadSong = useCallback((song:SavedHarmony) => {
+    setName(song.name)
+    const state = JSON.parse(song.code) as AppState
+    dispatch({ type: 'setState', state })
+    setInfo({ message: `Loaded song ${song.name}`, error: false })
+    setTimeout(() => setInfo({ error: false, message: '' }), 4000)
+  }, [dispatch])
+  
   const save = () => {
-    const { notes, chords, key } = positive
-    const object = {
-      code: JSON.stringify({ notes, chords, key }),
-      user: '10000',
-      name
-    }
-    setSaved([ ...saved, object ])
-    setSelected(saved.length)
+    const song = { name, userId, code: JSON.stringify(state) }
+    const others = saved.filter(s => s.name !== name)
+    setSaved([ ...others, song ])
+    setSelected(others.length)
+    axios.post<SavedHarmony>(`/songs`, song)
+      .then(() => displayInfo(`Saved song ${name}`, false))
+      .catch(error => displayInfo(`Error ${error.response?.status}`, true ))
   }
- 
-  const load = ({target}:ChangeEvent<HTMLSelectElement>) => {
+
+  const selectSong = ({target}:ChangeEvent<HTMLSelectElement>) => {
     const index = Number(target.value)
     setSelected(index)
-    const object = saved[index]
-    const harmony = JSON.parse(object.code) as StaffState
-    setHarmony(harmony)
+    loadSong(saved[index])
+  }
+
+  useEffect(() => {
+    axios.get<SavedHarmony[]>(`/songs/${userId}`)
+      .then(response => {
+        const songs = response.data
+        setSaved(songs)
+        if(songs.length > 0){
+          setSelected(songs.length - 1)
+          loadSong(songs[songs.length - 1])
+        }
+      })
+      .catch(error => displayInfo(`Error ${error.response?.status}`, true ))
+  }, [userId, loadSong])
+
+  const displayInfo = (message:string, error:boolean) => {
+    setInfo({ message, error })
+    setTimeout(() => setInfo({ error: false, message: '' }), 4000)
   }
 
   return (
-    <p>
-      <input
-          placeholder="Name" 
-          value={name} 
-          onChange={({target}) => setName(target.value)}
-      />
-      <button style={buttonStyle} onClick={save}>save</button>
-      <br />
-      <label>saved: </label>
-      <select value={selected} onChange={load}>
-        { saved.map((harmony, index) => 
-          <option key={harmony.name} value={index}>{harmony.name}</option>
-        ) }
-      </select>
-    </p>
+    <div>
+      <div>
+        <input
+            placeholder="Song name" 
+            value={name} 
+            onChange={({target}) => setName(target.value)}
+            style={songNameField}
+        />
+        <button style={buttonStyle} onClick={save}>save</button>
+        <label style={songsLabel}>Songs: </label>
+        <select value={selected} onChange={selectSong} style={songsSelector}>
+          { saved.map((harmony, index) => 
+            <option key={harmony.name} value={index}>{harmony.name}</option>
+          ) }
+        </select>
+        {info.message && <span style={savingInfo}>{info.message}</span>}
+      </div>
+    </div>
   )
 }
 
 export default Save
 
 interface SaveProps{
-  positive: StaffState,
-  setHarmony: (harmony:StaffState)=>void
+  state: AppState,
+  dispatch: React.Dispatch<AppAction>,
+  user: string
 }
 
 export interface SavedHarmony{
   name: string,
-  user: string,
+  userId: string,
   code: string
 }

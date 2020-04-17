@@ -1,4 +1,4 @@
-import { sharp, flat, transposeTone } from "./ToneUtils"
+import { sharp, flat, transposeTone, normal, normalize } from "./ToneUtils"
 import { isSharpKey } from "./StaffUtils"
 
 export type Chord = {
@@ -50,12 +50,15 @@ export const negateChord = (chord:Chord, fromKey:number, toKey:number) => {
 }
 
 const getLetter = (tone:number, key:number) => {
+    key = normalize(key)
+    if(key === 0){ return normal[tone] }
     return isSharpKey(key) ? sharp[tone] : flat[tone]
 }
 
 const findTone = (letter:string) => {
     letter = capitalizeFirstLetter(letter)
-    if(letter === 'B'){ letter = 'Bb' }
+    if(letter === 'B'){ letter = 'H' }
+    if(letter === 'Hb'){ letter = 'Bb' }
     let tone = sharp.indexOf(letter)
     if(tone === -1){ tone = flat.indexOf(letter) }
     return tone === -1 ? null : tone

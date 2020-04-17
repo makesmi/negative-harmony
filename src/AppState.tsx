@@ -2,18 +2,24 @@ import { negateChord } from "./Chords"
 import { StaffState, StaffAction, reduceStaff, DO_NOTHING, NONE_SELECTED } from "./StaffState"
 import { negateNote } from "./ToneUtils"
 
-export interface AppState{
+export type AppState = {
     positive: StaffState,
     negative: StaffState
 }
 
-export const reduceHarmony = ({positive, negative}:AppState, action:StaffAction) => {
+export type AppAction =
+    | StaffAction
+    | { type: 'setState', state: AppState }
+
+export const reduceHarmony = ({positive, negative}:AppState, action:AppAction) => {
     const reduce = (positiveAction:StaffAction, negativeAction:StaffAction) => ({
         positive: reduceStaff(positive, positiveAction),
         negative: reduceStaff(negative, negativeAction)
     })
 
     switch(action.type){
+        case 'setState':
+            return action.state
         case 'addNote':
             const negativeNote = negateNote(action.note, positive.key, negative.key)
             return reduce(action, { ...action, note: negativeNote })

@@ -72,7 +72,7 @@ const computeMetrics = (height: number, notesMax: number, key: number): Metrics 
     const noteGap = sheetHeight * 0.6
     const keySignGap = lineGap * 0.8
     const firstNoteX = lineGap * 3 + keySignGap * Math.abs(Functions.signsInKey[key])
-    const width = (notesMax + 0.5) * noteGap + firstNoteX
+    const width = (notesMax + 0.5) * noteGap
 
     return { width, linesY, lineGap, noteGap, firstNoteX, keySignGap }
 }

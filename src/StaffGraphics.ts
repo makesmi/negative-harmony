@@ -1,7 +1,7 @@
 import * as Functions from './StaffUtils'
-import sharpFile from './sharp.png'
-import neutralFile from './neutral.png'
-import flatFile from './flat.png'
+import sharpFile from './images/sharp.png'
+import neutralFile from './images/neutral.png'
+import flatFile from './images/flat.png'
 
 
 export const drawStaff = (notes: Note[], key: number, selected: number, metrics: Metrics, context: CanvasRenderingContext2D) => {
