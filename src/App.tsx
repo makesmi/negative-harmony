@@ -2,13 +2,12 @@ import React, { useReducer, useState } from 'react'
 import Piano from './Piano'
 import Staff from './Staff'
 import defaultHarmony from './DefaultHarmony'
-import { buttonStyle, appStyle, transposeButton } from './AppStyles'
 import Instructions from './Instructions'
 import Save from './Save'
 import { reduceHarmony } from './AppState'
 import { StaffState } from './StaffState'
 import ChordEditor from './ChordEditor'
-import './App.css'
+import './styles/App.css'
 import Login from './Login'
   
 
@@ -32,20 +31,20 @@ const App: React.FC = () => {
   }
 
   return (
-    <div style={appStyle}>
+    <div className="app">
       <div>
         <Staff state={positive} setSelected={selectNote(positive)} height={120} notesMax={25} />
       </div>
       <div>
         <Piano press={pressKey} height={120} keys={20} />
-        <button onClick={deleteNote} style={buttonStyle}>delete</button>
-        <button onClick={clear} style={buttonStyle}>clear</button>
+        <button onClick={deleteNote} className="button">delete</button>
+        <button onClick={clear} className="button">clear</button>
         <ChordEditor {...{ positive, negative, dispatch }} />
       </div>
       <div>
         <h2>Negative Harmony:{'\u00A0'}
-          <button style={transposeButton} onClick={transpose(-1)}>-</button>
-          <button style={transposeButton} onClick={transpose(1)}>+</button>
+          <button className="transposeButton" onClick={transpose(-1)}>-</button>
+          <button className="transposeButton" onClick={transpose(1)}>+</button>
         </h2>
         <Staff state={negative} setSelected={selectNote(negative)} height={120} notesMax={25} />
       </div>

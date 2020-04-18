@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, useEffect, useCallback } from 'react'
-import { buttonStyle, songsLabel, songsSelector, songNameField, savingInfo } from './AppStyles'
 import { AppState, AppAction } from './AppState'
 import axios from 'axios'
+import "./styles/Save.css"
 
 
 const Save: React.FC<SaveProps> = ({ state, dispatch, user }) => {
@@ -26,7 +26,7 @@ const Save: React.FC<SaveProps> = ({ state, dispatch, user }) => {
     setSelected(others.length)
     axios.post<SavedHarmony>(`/songs`, song)
       .then(() => displayInfo(`Saved song ${name}`, false))
-      .catch(error => displayInfo(`Error ${error.response?.status}`, true ))
+      .catch(error => displayInfo(`Error: ${error.response?.status}`, true ))
   }
 
   const selectSong = ({target}:ChangeEvent<HTMLSelectElement>) => {
@@ -45,12 +45,14 @@ const Save: React.FC<SaveProps> = ({ state, dispatch, user }) => {
           loadSong(songs[songs.length - 1])
         }
       })
-      .catch(error => displayInfo(`Error ${error.response?.status}`, true ))
+      .catch(error => displayInfo(`Error: ${error.response?.status}`, true ))
   }, [userId, loadSong])
 
   const displayInfo = (message:string, error:boolean) => {
     setInfo({ message, error })
-    setTimeout(() => setInfo({ error: false, message: '' }), 4000)
+    if(!error){
+      setTimeout(() => setInfo({ error: false, message: '' }), 4000)
+    }
   }
 
   return (
@@ -60,16 +62,18 @@ const Save: React.FC<SaveProps> = ({ state, dispatch, user }) => {
             placeholder="Song name" 
             value={name} 
             onChange={({target}) => setName(target.value)}
-            style={songNameField}
+            className="songNameField"
         />
-        <button style={buttonStyle} onClick={save}>save</button>
-        <label style={songsLabel}>Songs: </label>
-        <select value={selected} onChange={selectSong} style={songsSelector}>
+        <button className="button" onClick={save}>save</button>
+        <label className="songsLabel">Songs: </label>
+        <select value={selected} onChange={selectSong} className="songsSelector">
           { saved.map((harmony, index) => 
             <option key={harmony.name} value={index}>{harmony.name}</option>
           ) }
         </select>
-        {info.message && <span style={savingInfo}>{info.message}</span>}
+        {info.message && <span className={ info.error ? "savingError" : "savingInfo" }>
+          {info.message}
+        </span>}
       </div>
     </div>
   )

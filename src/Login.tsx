@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { facebookButton } from './AppStyles'
 import { production } from './Environment'
 
 const Login:React.FC<LoginProps> = ({ user, setUser }) => {
@@ -35,14 +34,14 @@ const Login:React.FC<LoginProps> = ({ user, setUser }) => {
   }
 
   if(user){
-    return <button style={facebookButton} onClick={logout}
+    return <button className="facebookButton" onClick={logout}
               onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
         {hover ? 'Log out' : 'Logged in'}
       </button>
   }else if(loading){
-    return <button style={facebookButton}>loading...</button>
+    return <button className="facebookButton">loading...</button>
   }else{
-    return <button onClick={loginWithFacebook} style={facebookButton}>Login with Facebook</button>
+    return <button onClick={loginWithFacebook} className="facebookButton">Login with Facebook</button>
   }
 } 
 

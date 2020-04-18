@@ -1,0 +1,75 @@
+button:focus{
+    outline: none;
+}
+
+.app{
+    margin-left: 15pt;
+    margin-top: 30pt;
+}
+
+.buttonLayout{
+    font-size: 15pt;
+    font-family: Arial, Helvetica, sans-serif;
+    border: #aaa solid;
+    cursor: pointer;
+    &:hover{
+        background: #ccc;
+    }
+    &:active{
+        background: #aaa;
+    }
+}
+
+.button{
+    .buttonLayout;
+    margin-left: 8pt;
+    border-radius: 4pt;    
+}
+
+.transposeButton{
+    .buttonLayout;
+    margin-left: 6pt;
+    padding: 0pt;
+    min-width: 21pt;
+    border-radius: 11pt;
+}
+
+.hiddenChordInput{
+    background: transparent;
+    border: none;
+    outline: none;
+    color: transparent;
+    cursor: default;
+    position: absolute;
+}
+
+.info{
+    padding: 5px;
+    border-radius: 0.3em;
+    font-weight: bold;
+    font-size: 1.3em;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-left: 0.5em;
+}
+
+.error{
+    .info;
+    background: 'pink';
+    color: #8B0000;
+}
+
+.facebookButton{
+    border-radius: 0.6em;
+    border: solid#bbb;
+    background: #4267B2;
+    color: white;
+    font-weight: bold;
+    padding: 0.3em 0.5em;
+    cursor: pointer;
+    min-width: 7em;
+}
+
+.piano{
+    border: solid #555 2px;
+    border-radius: 5pt;
+}

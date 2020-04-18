@@ -1,7 +1,6 @@
 import React, {useRef, useEffect, useState} from 'react'
 import * as Letters from './ToneUtils'
 import { drawKeys, KeyArea } from './PianoGraphics'
-import { pianoStyle } from './AppStyles'
 
 const Piano: React.FC<PianoProps> = ({ press, keys = 32, first = 'A', height = 100 }) => {
     const firstTone = Letters.getTone(first)
@@ -29,7 +28,7 @@ const Piano: React.FC<PianoProps> = ({ press, keys = 32, first = 'A', height = 1
         setPressed([])
     }
 
-    return <canvas width={metrics.width} height={height} style={pianoStyle}
+    return <canvas width={metrics.width} height={height} className="piano"
         onMouseDown={click} onMouseUp={release} ref={canvas}></canvas>
 }
 

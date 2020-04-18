@@ -1,8 +1,7 @@
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react'
 import { StaffState, StaffAction, NONE_SELECTED } from './StaffState'
 import { constructChord, printChord } from './Chords'
-import { hiddenInput, errorStyle } from './AppStyles'
-
+ 
 const ChordEditor:React.FC<ChordEditorProps> = ({ positive, negative, dispatch }) => {
   const [chordText, setChordText] = useState('')
   const [error, setError] = useState('')
@@ -41,8 +40,8 @@ const ChordEditor:React.FC<ChordEditorProps> = ({ positive, negative, dispatch }
   
   return (
     <span>
-      <input value={chordText} onChange={updateChordText} ref={input} style={hiddenInput}/>
-      {error && <span style={errorStyle}>{error}</span>}
+      <input value={chordText} onChange={updateChordText} ref={input} className="hiddenChordInput"/>
+      {error && <span className="error">{error}</span>}
     </span>
   )
 }
