@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from 'react'
+import React, { useReducer, useState, useCallback } from 'react'
 import Piano from './Piano'
 import Staff from './Staff'
 import defaultHarmony from './DefaultHarmony'
@@ -14,8 +14,9 @@ import Login from './Login'
 const App: React.FC = () => {
   const [{ positive, negative }, dispatch] = useReducer(reduceHarmony, defaultHarmony)
   const [user, setUser] = useState('')
+  const [message, setMessage] = useState({ error: false, message: '' })
 
-  const pressKey = (key: number) => {
+  const pressKey = (key:number) => {
     const note = key - 3    //first key in the piano is A instead of C
     dispatch({ type: 'addNote', note })
   }
@@ -29,6 +30,13 @@ const App: React.FC = () => {
   const transpose = (direction:number) => () => {
     dispatch({ type: 'transpose', direction })
   }
+
+  const displayMessage = useCallback((message:string, error:boolean) => {
+    setMessage({ message, error })
+    if(!error){
+      setTimeout(() => setMessage({ error: false, message: '' }), 4000)
+    }
+  }, [])
 
   return (
     <div className="app">
@@ -49,9 +57,15 @@ const App: React.FC = () => {
         <Staff state={negative} setSelected={selectNote(negative)} height={120} notesMax={25} />
       </div>
       <div style={{ margin: '0.3em' }}>
-        <Login {...{ user, setUser }}/>
+        <Login {...{ user, setUser: useCallback(setUser, []), displayMessage }}/>
+        {
+          message.message && <span className={ message.error ? "errorMessage" : "infoMessage" }
+              onClick={() => displayMessage('', false)}>
+            {message.message}
+          </span>
+        }
       </div>
-      { user && <Save state={{ positive, negative }} {...{ dispatch, user }}/> }
+      { user && <Save state={{ positive, negative }} {...{ dispatch, displayMessage }}/> }
       <Instructions />
     </div>
   )

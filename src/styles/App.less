@@ -43,28 +43,14 @@ button:focus{
     position: absolute;
 }
 
-.info{
-    padding: 5px;
-    border-radius: 0.3em;
-    font-weight: bold;
-    font-size: 1.3em;
-    font-family: Arial, Helvetica, sans-serif;
-    margin-left: 0.5em;
-}
-
-.error{
-    .info;
-    background: 'pink';
-    color: #8B0000;
-}
-
 .facebookButton{
     border-radius: 0.6em;
-    border: solid#bbb;
+    border: solid #bbb;
     background: #4267B2;
     color: white;
     font-weight: bold;
     padding: 0.3em 0.5em;
+    margin: 0.5em 0.0em;
     cursor: pointer;
     min-width: 7em;
 }
@@ -72,4 +58,24 @@ button:focus{
 .piano{
     border: solid #555 2px;
     border-radius: 5pt;
+}
+
+.infoMessage{
+    padding: 3pt 10pt 3pt 10pt;
+    border-radius: 0.3em;
+    font-size: 1.2em;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-weight: bold;
+    background: #ded;
+    color: #555;
+    display: inline-block;
+    margin-left: 25pt;
+    vertical-align: middle;
+    line-height: normal;
+}
+
+.errorMessage{
+    .infoMessage;
+    background: #edd; 
+    color: #622;
 }

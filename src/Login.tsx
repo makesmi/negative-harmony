@@ -1,36 +1,51 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { production } from './Environment'
+import axios from 'axios'
 
-const Login:React.FC<LoginProps> = ({ user, setUser }) => {
-  const [ update, setUpdate] = useState(0)
+const TOKEN_HEADER = 'negativeharmony_token'
+
+const setToken = (token:string|null) => 
+  axios.defaults.headers.common[TOKEN_HEADER] = token
+
+const Login:React.FC<LoginProps> = ({ user, setUser, displayMessage }) => {
   const [ loading, setLoading ] = useState(true)
   const [ hover, setHover ] = useState(false)
 
-  const checkFBLoginStatus = (status:fb.StatusResponse) => {
-    setLoading(false)
+  const checkFBLoginStatus = useCallback((status:fb.StatusResponse) => {
     if(status.status === 'connected'){
-      setUser(status.authResponse.userID)
+      setToken(status.authResponse.accessToken)
+      axios.post('/login')
+        .then(() => {
+          setLoading(false)
+          setUser(status.authResponse.userID)
+        })
+        .catch(error => displayMessage(`Error: ${error.response?.status}`, true ))
+    }else{
+      setLoading(false)
     }
-  }
+  }, [setUser, displayMessage])
 
-  if(loading){
-    if(!production()){
+  useEffect(() => {
+    if(production()){
+      whenFacebookReady(() => {
+        FB.getLoginStatus(checkFBLoginStatus)
+      })
+    }else{
       setTimeout(() => {
         setLoading(false)
-        setUser('kayttaja')
+        setToken('token')
+        axios.post('/login').then(() => setUser('user'))
       }, 0)
-    }else if(window.FB){
-      FB.getLoginStatus(checkFBLoginStatus)
-    }else{
-      setTimeout(() => setUpdate(update + 1), 1000)
     }
-  }
+  }, [setUser, checkFBLoginStatus])
   
-  const loginWithFacebook = () => FB.login(checkFBLoginStatus)
+  const loginWithFacebook = () => FB.login(checkFBLoginStatus, { scope: '' })
 
   const logout = () => {
     FB.logout()
     setUser('')
+    axios.post('/logout')
+    setToken(null)
   }
 
   if(user){
@@ -45,9 +60,18 @@ const Login:React.FC<LoginProps> = ({ user, setUser }) => {
   }
 } 
 
+const whenFacebookReady = (callback:()=>void) => {
+  if(window.FB){
+    callback()
+  }else{
+    setTimeout(() => whenFacebookReady(callback), 800)
+  }
+}
+
 type LoginProps = {
   user: string,
-  setUser: (user:string)=>void
+  setUser: (user:string)=>void,
+  displayMessage: (message:string, error:boolean)=>void
 }
 
 export default Login

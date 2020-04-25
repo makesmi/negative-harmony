@@ -3,30 +3,26 @@ import { AppState, AppAction } from './AppState'
 import axios from 'axios'
 import "./styles/Save.css"
 
-
-const Save: React.FC<SaveProps> = ({ state, dispatch, user }) => {
+const Save: React.FC<SaveProps> = ({ state, dispatch, displayMessage }) => {
   const [name, setName] = useState('')
   const [selected, setSelected] = useState(-1)
   const [saved, setSaved] = useState<SavedHarmony[]>([])
-  const [info, setInfo] = useState({ error: false, message: '' })
-  const userId = user
 
   const loadSong = useCallback((song:SavedHarmony) => {
     setName(song.name)
     const state = JSON.parse(song.code) as AppState
     dispatch({ type: 'setState', state })
-    setInfo({ message: `Loaded song ${song.name}`, error: false })
-    setTimeout(() => setInfo({ error: false, message: '' }), 4000)
-  }, [dispatch])
+    displayMessage( `Loaded song ${song.name}`, false)
+  }, [dispatch, displayMessage])
   
   const save = () => {
-    const song = { name, userId, code: JSON.stringify(state) }
+    const song = { name, code: JSON.stringify(state) }
     const others = saved.filter(s => s.name !== name)
     setSaved([ ...others, song ])
     setSelected(others.length)
     axios.post<SavedHarmony>(`/songs`, song)
-      .then(() => displayInfo(`Saved song ${name}`, false))
-      .catch(error => displayInfo(`Error: ${error.response?.status}`, true ))
+      .then(() => displayMessage(`Saved song ${name}`, false))
+      .catch(error => displayMessage(`Error: ${error.response?.status}`, true ))
   }
 
   const selectSong = ({target}:ChangeEvent<HTMLSelectElement>) => {
@@ -36,7 +32,7 @@ const Save: React.FC<SaveProps> = ({ state, dispatch, user }) => {
   }
 
   useEffect(() => {
-    axios.get<SavedHarmony[]>(`/songs/${userId}`)
+    axios.get<SavedHarmony[]>(`/songs`)
       .then(response => {
         const songs = response.data
         setSaved(songs)
@@ -45,15 +41,8 @@ const Save: React.FC<SaveProps> = ({ state, dispatch, user }) => {
           loadSong(songs[songs.length - 1])
         }
       })
-      .catch(error => displayInfo(`Error: ${error.response?.status}`, true ))
-  }, [userId, loadSong])
-
-  const displayInfo = (message:string, error:boolean) => {
-    setInfo({ message, error })
-    if(!error){
-      setTimeout(() => setInfo({ error: false, message: '' }), 4000)
-    }
-  }
+      .catch(error => displayMessage(`Error: ${error.response?.status}`, true ))
+  }, [loadSong, displayMessage])
 
   return (
     <div>
@@ -71,9 +60,6 @@ const Save: React.FC<SaveProps> = ({ state, dispatch, user }) => {
             <option key={harmony.name} value={index}>{harmony.name}</option>
           ) }
         </select>
-        {info.message && <span className={ info.error ? "savingError" : "savingInfo" }>
-          {info.message}
-        </span>}
       </div>
     </div>
   )
@@ -84,11 +70,10 @@ export default Save
 interface SaveProps{
   state: AppState,
   dispatch: React.Dispatch<AppAction>,
-  user: string
+  displayMessage: (message:string, error:boolean)=>void
 }
 
 export interface SavedHarmony{
   name: string,
-  userId: string,
   code: string
 }
